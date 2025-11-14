@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Who Wants to Be a Millionaire - Indonesia</title>
+    <!-- Memuat library untuk membaca file Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
@@ -37,1415 +38,761 @@
         }
 
         .header h1 {
-            font-size: clamp(1rem, 4vw, 1.8rem);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .header p {
-            font-size: clamp(0.7rem, 2vw, 0.9rem);
-            margin-top: 5px;
-        }
-
-        /* Audio Controls */
-        .audio-controls {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 999;
-            display: flex;
-            gap: 8px;
-        }
-
-        .audio-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #ffaa00;
-            background: rgba(26, 26, 77, 0.9);
-            color: white;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .audio-btn:hover {
-            background: #ffaa00;
-            transform: scale(1.1);
-        }
-
-        .audio-btn.muted {
-            opacity: 0.5;
-        }
-
-        /* Leaderboard Button */
-        .leaderboard-btn {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 999;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #ffaa00;
-            background: rgba(26, 26, 77, 0.9);
-            color: white;
-            cursor: pointer;
             font-size: 1.5rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .leaderboard-btn:hover {
-            background: #ffaa00;
-            transform: scale(1.1);
         }
 
         /* Start Section */
-        .start-section {
-            text-align: center;
-            padding: 30px 20px;
-            background: rgba(255,255,255,0.1);
+        #startSection {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
             border-radius: 15px;
-            margin-bottom: 10px;
-            backdrop-filter: blur(10px);
-            max-width: 500px;
+            text-align: center;
+            max-width: 600px;
             margin: 20px auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
         }
 
-        .start-section h2 {
-            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        #startSection h2 {
             margin-bottom: 20px;
             color: #ffaa00;
         }
 
         .input-group {
-            margin: 20px 0;
+            margin-bottom: 20px;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 10px;
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-            color: #ffaa00;
-        }
-
-        .input-group input {
-            width: 100%;
-            max-width: 300px;
-            padding: 12px 20px;
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-            border: 2px solid #ffaa00;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            text-align: center;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            background: rgba(255,255,255,0.2);
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
-        }
-
-        .upload-btn, .start-btn {
-            padding: 12px 30px;
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-            background: linear-gradient(90deg, #00ff88, #00cc6f);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            color: white;
+            margin-bottom: 8px;
+            text-align: left;
             font-weight: bold;
-            transition: transform 0.3s;
-            margin: 10px 5px;
         }
 
-        .upload-btn:hover, .start-btn:hover {
-            transform: scale(1.05);
+        #playerName {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ffaa00;
+            background: #0d0d26;
+            color: white;
+            font-size: 1rem;
         }
 
-        .start-btn {
-            background: linear-gradient(90deg, #ff6b00, #ffaa00);
-            font-size: clamp(1rem, 3vw, 1.3rem);
-            padding: 15px 40px;
+        .file-upload-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .custom-file-upload {
+            border: 1px dashed #ffaa00;
+            display: inline-block;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            background: #1a1a4d;
         }
 
         #fileInput {
             display: none;
         }
 
-        /* Game Layout */
-        .game-container {
-            display: none;
-            grid-template-columns: 1fr 250px;
-            gap: 10px;
+        #fileName {
             margin-top: 10px;
+            font-style: italic;
+            color: #ccc;
         }
 
-        @media (max-width: 968px) {
-            .game-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Main Game Area */
-        .main-game {
-            background: rgba(0,0,0,0.5);
-            border-radius: 10px;
-            padding: 15px;
-            backdrop-filter: blur(10px);
-        }
-
-        /* Player Info */
-        .player-info {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-            color: #00ff88;
-            font-weight: bold;
-        }
-
-        /* Question Box */
-        .question-box {
-            background: linear-gradient(135deg, #2d2d6d, #1a1a4d);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border: 2px solid #ffaa00;
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.3);
-            min-height: 80px;
+        .start-buttons {
             display: flex;
-            align-items: center;
+            gap: 15px;
             justify-content: center;
         }
 
-        .question-text {
-            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
-            text-align: center;
-            line-height: 1.4;
-        }
-
-        /* Current Prize Display */
-        .current-prize {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: clamp(1rem, 3vw, 1.5rem);
-            color: #ffaa00;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
-        }
-
-        /* Options - 3D Style */
-        .options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 15px;
-            perspective: 1000px;
-        }
-
-        @media (max-width: 600px) {
-            .options {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-        }
-
-        .option {
-            background: linear-gradient(145deg, #2d2d6d, #1a1a4d);
-            border: 3px solid #4d4d9d;
-            border-radius: 12px;
-            padding: 15px 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            box-shadow: 
-                5px 5px 15px rgba(0, 0, 0, 0.5),
-                -5px -5px 15px rgba(77, 77, 157, 0.1),
-                inset 0 0 10px rgba(77, 77, 157, 0.1);
-            transform-style: preserve-3d;
-        }
-
-        .option::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 170, 0, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .option:hover:not(.disabled)::before {
-            left: 100%;
-        }
-
-        .option:hover:not(.disabled) {
-            border-color: #ffaa00;
-            transform: translateY(-5px) translateZ(20px);
-            box-shadow: 
-                8px 8px 20px rgba(0, 0, 0, 0.6),
-                -8px -8px 20px rgba(77, 77, 157, 0.2),
-                0 5px 25px rgba(255, 170, 0, 0.5),
-                inset 0 0 15px rgba(255, 170, 0, 0.2);
-        }
-
-        .option-label {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 35px;
-            height: 35px;
-            min-width: 35px;
-            background: linear-gradient(145deg, #ffaa00, #ff8800);
-            color: #1a1a4d;
-            border-radius: 50%;
-            font-weight: bold;
-            margin-right: 12px;
-            font-size: clamp(1rem, 2.5vw, 1.2rem);
-            box-shadow: 
-                3px 3px 8px rgba(0, 0, 0, 0.4),
-                -2px -2px 6px rgba(255, 200, 100, 0.5),
-                inset 0 0 5px rgba(255, 255, 255, 0.3);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .option-text {
-            font-size: clamp(0.85rem, 2vw, 1rem);
-            flex: 1;
-            word-wrap: break-word;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        .option.selected {
-            border-color: #ffaa00;
-            background: linear-gradient(145deg, #665500, #997700);
-            animation: pulse 1s infinite;
-            box-shadow: 
-                0 0 20px rgba(255, 170, 0, 0.8),
-                inset 0 0 20px rgba(255, 170, 0, 0.3);
-        }
-
-        .option.correct {
-            border-color: #00ff88;
-            background: linear-gradient(145deg, #006644, #009966);
-            box-shadow: 
-                0 0 25px rgba(0, 255, 136, 0.8),
-                inset 0 0 20px rgba(0, 255, 136, 0.3);
-        }
-
-        .option.correct .option-label {
-            background: linear-gradient(145deg, #00ff88, #00cc6f);
-        }
-
-        .option.wrong {
-            border-color: #ff0000;
-            background: linear-gradient(145deg, #660000, #990000);
-            box-shadow: 
-                0 0 25px rgba(255, 0, 0, 0.8),
-                inset 0 0 20px rgba(255, 0, 0, 0.3);
-        }
-
-        .option.wrong .option-label {
-            background: linear-gradient(145deg, #ff4444, #cc0000);
-        }
-
-        .option.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            transform: scale(0.95);
-        }
-
-        @keyframes pulse {
-            0%, 100% { 
-                opacity: 1;
-                transform: translateY(-5px) scale(1);
-            }
-            50% { 
-                opacity: 0.8;
-                transform: translateY(-5px) scale(1.02);
-            }
-        }
-
-        /* Lifelines */
-        .lifelines {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        .lifeline-btn {
-            padding: 8px 15px;
-            background: linear-gradient(135deg, #6600cc, #9933ff);
-            border: 2px solid #9933ff;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            font-size: clamp(0.75rem, 2vw, 0.9rem);
-        }
-
-        .lifeline-btn:hover:not(.used) {
-            transform: scale(1.05);
-            box-shadow: 0 3px 12px rgba(153, 51, 255, 0.4);
-        }
-
-        .lifeline-btn.used {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        /* Prize Ladder */
-        .prize-ladder {
-            background: rgba(0,0,0,0.5);
-            border-radius: 10px;
-            padding: 10px;
-            backdrop-filter: blur(10px);
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .prize-ladder h3 {
-            text-align: center;
-            margin-bottom: 10px;
-            color: #ffaa00;
-            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
-        }
-
-        .prize-item {
-            padding: 6px 10px;
-            margin: 3px 0;
-            background: rgba(77, 77, 157, 0.3);
-            border-radius: 6px;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: clamp(0.75rem, 2vw, 0.9rem);
-        }
-
-        .prize-item.current {
-            background: linear-gradient(90deg, #ff6b00, #ffaa00);
-            border-color: #ffaa00;
-            font-weight: bold;
-            animation: glow 1.5s infinite;
-        }
-
-        .prize-item.passed {
-            background: rgba(0, 255, 136, 0.2);
-            border-color: #00ff88;
-        }
-
-        .prize-item.milestone {
-            background: rgba(255, 170, 0, 0.3);
-            border-left: 3px solid #ffaa00;
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 3px rgba(255, 170, 0, 0.5); }
-            50% { box-shadow: 0 0 15px rgba(255, 170, 0, 0.8); }
-        }
-
-        .prize-number {
-            font-weight: bold;
-            color: #ffaa00;
-        }
-
-        .prize-amount {
-            font-weight: bold;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #1a1a4d, #0d0d26);
-            padding: 25px 20px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-            border: 3px solid #ffaa00;
-            box-shadow: 0 0 30px rgba(255, 170, 0, 0.5);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-content h2 {
-            font-size: clamp(1.2rem, 4vw, 1.8rem);
-            margin-bottom: 15px;
-            color: #ffaa00;
-        }
-
-        .modal-content p {
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-        }
-
-        .modal-content .final-prize {
-            font-size: clamp(1.5rem, 5vw, 2.5rem);
-            color: #00ff88;
-            margin: 15px 0;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-        }
-
-        .restart-btn, .close-btn {
-            padding: 10px 25px;
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-            background: linear-gradient(90deg, #00ff88, #00cc6f);
+        .btn {
+            padding: 12px 25px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            color: white;
+            font-size: 1rem;
             font-weight: bold;
-            margin: 8px 5px;
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
-        .restart-btn:hover, .close-btn:hover {
+        #startButton {
+            background: linear-gradient(135deg, #00b300, #008000);
+            color: white;
+        }
+
+        #startButton:hover {
+            background: linear-gradient(135deg, #00cc00, #009900);
+            box-shadow: 0 4px 10px rgba(0, 204, 0, 0.4);
+        }
+
+        #leaderboardButton {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+        
+        #leaderboardButton:hover {
+            background: linear-gradient(135deg, #008fff, #0066cc);
+            box-shadow: 0 4px 10px rgba(0, 143, 255, 0.4);
+        }
+
+        /* Game Container */
+        #gameContainer {
+            display: none;
+            max-width: 900px;
+            margin: 10px auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Info Bar */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #0d0d26;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .info-bar-item {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        #currentPrize {
+            color: #ffaa00;
+        }
+
+        /* Prize List */
+        .prize-list {
+            list-style: none;
+            text-align: right;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #0d0d26;
+            border-radius: 8px;
+        }
+
+        .prize-list li {
+            padding: 4px 10px;
+            border-radius: 5px;
+            margin-bottom: 3px;
+            font-size: 0.9rem;
+            color: #aaa;
+            font-weight: bold;
+        }
+
+        .prize-list li.current {
+            background: #ffaa00;
+            color: #0d0d26;
             transform: scale(1.05);
         }
 
-        .close-btn {
-            background: linear-gradient(90deg, #ff6b00, #ffaa00);
+        .prize-list li.safe {
+            color: #33cc33; /* Warna untuk titik aman */
         }
 
-        /* Leaderboard */
-        .leaderboard-table {
+        /* Question Area */
+        .question-box {
+            background: linear-gradient(135deg, #ff6b00, #ffaa00);
+            color: #1a1a4d;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(255, 170, 0, 0.3);
+        }
+
+        /* Answers Area */
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .answer-btn {
+            background: linear-gradient(135deg, #1a1a4d, #0d0d26);
+            color: white;
+            border: 2px solid #ffaa00;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ff6b00, #ffaa00);
+            color: #1a1a4d;
+        }
+        
+        .answer-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .answer-btn.selected {
+            background: #ffc107; /* Kuning saat dipilih */
+            color: #0d0d26;
+        }
+
+        .answer-btn.correct {
+            background: #28a745; /* Hijau untuk jawaban benar */
+            color: white;
+            border-color: #28a745;
+        }
+
+        .answer-btn.wrong {
+            background: #dc3545; /* Merah untuk jawaban salah */
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .answer-prefix {
+            font-weight: bold;
+            color: #ffaa00;
+            margin-right: 10px;
+        }
+
+        /* Modals (Game Over & Leaderboard) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .modal-content {
+            background: #1a1a4d;
+            margin: auto;
+            padding: 25px;
+            border: 1px solid #ffaa00;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 170, 0, 0.4);
+        }
+
+        .modal-content h2 {
+            color: #ffaa00;
+            margin-bottom: 15px;
+        }
+
+        #gameOverMessage {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Leaderboard Table */
+        #leaderboardTable {
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
         }
 
-        .leaderboard-table th,
-        .leaderboard-table td {
+        #leaderboardTable th, #leaderboardTable td {
             padding: 10px;
+            border: 1px solid #0d0d26;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 170, 0, 0.3);
-            font-size: clamp(0.8rem, 2vw, 0.95rem);
         }
 
-        .leaderboard-table th {
-            background: rgba(255, 170, 0, 0.2);
-            color: #ffaa00;
-            font-weight: bold;
+        #leaderboardTable th {
+            background: #ffaa00;
+            color: #0d0d26;
         }
-
-        .leaderboard-table tr:hover {
-            background: rgba(255, 170, 0, 0.1);
+        
+        #leaderboardTable tr:nth-child(even) {
+            background: #0d0d26;
         }
 
         .rank-medal {
             font-size: 1.2rem;
-            margin-right: 5px;
         }
 
-        .no-scores {
-            text-align: center;
-            padding: 30px;
-            color: #ffaa00;
-            font-style: italic;
-        }
-
-        /* Timer */
-        .timer {
-            text-align: center;
-            font-size: clamp(1.2rem, 3vw, 1.5rem);
-            color: #ff6b00;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        .timer.warning {
-            color: #ff0000;
-            animation: blink 0.5s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Audience Poll */
-        .audience-poll {
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-        }
-
-        .audience-poll h3 {
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-            margin-bottom: 10px;
-        }
-
-        .poll-bar {
-            margin: 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .poll-label {
-            width: 25px;
-            font-weight: bold;
-            font-size: clamp(0.8rem, 2vw, 0.9rem);
-        }
-
-        .poll-progress {
-            flex: 1;
-            height: 25px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 5px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .poll-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff88, #00cc6f);
-            transition: width 1s ease;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 8px;
-            font-weight: bold;
-            font-size: clamp(0.75rem, 2vw, 0.85rem);
-        }
-
-        /* Instructions */
-        .instructions {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            text-align: left;
-        }
-
-        .instructions h3 {
-            color: #ffaa00;
-            margin-bottom: 8px;
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-        }
-
-        .instructions ul {
-            list-style-position: inside;
-            line-height: 1.6;
-            font-size: clamp(0.75rem, 2vw, 0.9rem);
-        }
-
-        .quit-btn {
-            padding: 8px 20px;
-            font-size: clamp(0.8rem, 2vw, 1rem);
-            background: linear-gradient(90deg, #ff6b00, #ffaa00);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+        #clearLeaderboardBtn {
+            background: #dc3545;
             color: white;
-            font-weight: bold;
-            transition: transform 0.3s;
+            margin-top: 15px;
+        }
+        #clearLeaderboardBtn:hover {
+            background: #c82333;
         }
 
-        .quit-btn:hover {
-            transform: scale(1.05);
-        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
 
-        .success-message {
-            color: #00ff88;
-            font-weight: bold;
-            margin-top: 10px;
-        }
+            .info-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
 
-        .error-message {
-            color: #ff6b00;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #ffaa00;
-            border-radius: 10px;
-        }
-
-        @media (max-width: 968px) {
-            .prize-ladder {
-                max-height: 300px;
-                margin-top: 15px;
+            .prize-list {
+                display: none; /* Sembunyikan daftar di HP untuk hemat ruang */
             }
         }
     </style>
 </head>
 <body>
-    <!-- Audio Elements -->
-    <audio id="bgMusic" loop>
-        <source src="musik.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="correctSound">
-        <source src="benar.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="wrongSound">
-        <source src="salah.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="timeSound">
-        <source src="waktu.mp3" type="audio/mpeg">
-    </audio>
-
-    <!-- Leaderboard Button -->
-    <button class="leaderboard-btn" onclick="showLeaderboard()" title="Papan Skor">
-        🏆
-    </button>
-
-    <!-- Audio Controls -->
-    <div class="audio-controls">
-        <button class="audio-btn" id="musicToggle" onclick="toggleMusic()" title="Musik Latar">
-            🎵
-        </button>
-        <button class="audio-btn" id="sfxToggle" onclick="toggleSFX()" title="Efek Suara">
-            🔊
-        </button>
-    </div>
-
     <div class="container">
-        <div class="header">
-            <h1>🎮 WHO WANTS TO BE A MILLIONAIRE 🎮</h1>
-            <p>Edisi Indonesia - Raih Hadiah 1 Miliar Rupiah!</p>
-        </div>
+        <header class="header">
+            <h1>Who Wants to Be a Millionaire - Indonesia</h1>
+        </header>
 
         <!-- Start Section -->
-        <div class="start-section" id="startSection">
-            <h2>🎯 Selamat Datang!</h2>
-            
+        <section id="startSection">
+            <h2>Selamat Datang!</h2>
             <div class="input-group">
-                <label for="playerName">📝 Masukkan Nama Anda:</label>
-                <input type="text" id="playerName" placeholder="Nama Anda" maxlength="20">
+                <label for="playerName">Masukkan Nama Anda:</label>
+                <input type="text" id="playerName" placeholder="Nama Pemain...">
+            </div>
+            
+            <div class="file-upload-group">
+                <label>Muat Bank Soal (Opsional, .xlsx):</label>
+                <label for="fileInput" class="custom-file-upload">Pilih File</label>
+                <input type="file" id="fileInput" accept=".xlsx" onchange="handleFile(event)">
+                <div id="fileName">Bank Soal Default akan digunakan.</div>
             </div>
 
-            <div class="instructions">
-                <h3>📊 Format File Excel:</h3>
-                <ul>
-                    <li><strong>Kolom A-C:</strong> Soal Mudah</li>
-                    <li><strong>Kolom D-F:</strong> Soal Sedang</li>
-                    <li><strong>Kolom G-I:</strong> Soal Sulit</li>
-                    <li><strong>Opsi:</strong> Pisahkan dengan koma (,)</li>
-                    <li><strong>Baris 1:</strong> Diabaikan (header)</li>
-                </ul>
+            <div class="start-buttons">
+                <button id="startButton" class="btn" onclick="startGame()">Mulai</button>
+                <button id="leaderboardButton" class="btn" onclick="showLeaderboard()">Papan Skor</button>
             </div>
-
-            <p id="loadStatus" class="success-message"></p>
-
-            <div style="margin-top: 20px;">
-                <input type="file" id="fileInput" accept=".xlsx, .xls">
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                    📁 Upload Soal Sendiri
-                </button>
-                <p id="fileName" style="margin-top: 10px; font-size: 0.9rem;"></p>
-            </div>
-
-            <button class="start-btn" id="startBtn" onclick="startGame()">
-                🎮 MULAI PERMAINAN
-            </button>
-        </div>
+        </section>
 
         <!-- Game Container -->
-        <div class="game-container" id="gameContainer">
-            <div class="main-game">
-                <div class="player-info">
-                    👤 <span id="playerNameDisplay"></span>
-                </div>
-
-                <div class="current-prize">
-                    💰 <span id="currentPrize">Rp 50.000</span>
-                </div>
-
-                <div class="timer" id="timer"></div>
-
-                <div class="question-box">
-                    <div class="question-text" id="questionText">
-                        Selamat datang! Siap menjadi jutawan?
-                    </div>
-                </div>
-
-                <div class="lifelines">
-                    <button class="lifeline-btn" id="lifeline5050" onclick="use5050()">
-                        ➗ 50:50
-                    </button>
-                    <button class="lifeline-btn" id="lifelinePhone" onclick="phoneAFriend()">
-                        📞 Telepon
-                    </button>
-                    <button class="lifeline-btn" id="lifelineAudience" onclick="askAudience()">
-                        👥 Penonton
-                    </button>
-                </div>
-
-                <div id="audiencePoll"></div>
-
-                <div class="options" id="optionsContainer"></div>
-
-                <div style="text-align: center;">
-                    <button class="quit-btn" onclick="quitGame()">
-                        💰 Ambil Uang & Berhenti
-                    </button>
-                </div>
+        <section id="gameContainer">
+            <!-- Info Bar -->
+            <div class="info-bar">
+                <div class="info-bar-item" id="playerNameDisplay"></div>
+                <div class="info-bar-item" id="questionNumber"></div>
+                <div class="info-bar-item" id="currentPrize"></div>
             </div>
 
-            <div class="prize-ladder" id="prizeLadder">
-                <h3>💎 Tangga Hadiah</h3>
-                <div id="prizeList"></div>
+            <!-- Prize List (Desktop) -->
+            <ul class="prize-list" id="prizeList">
+                <!-- Daftar hadiah akan diisi oleh JavaScript -->
+            </ul>
+
+            <!-- Question Box -->
+            <div class="question-box" id="questionText">
+                Memuat pertanyaan...
             </div>
-        </div>
+
+            <!-- Answers -->
+            <div class="answers-grid">
+                <button class="answer-btn" id="answerA" onclick="selectAnswer('A')"><span class="answer-prefix">A:</span> <span id="answerA_text"></span></button>
+                <button class="answer-btn" id="answerB" onclick="selectAnswer('B')"><span class="answer-prefix">B:</span> <span id="answerB_text"></span></button>
+                <button class="answer-btn" id="answerC" onclick="selectAnswer('C')"><span class="answer-prefix">C:</span> <span id="answerC_text"></span></button>
+                <button class="answer-btn" id="answerD" onclick="selectAnswer('D')"><span class="answer-prefix">D:</span> <span id="answerD_text"></span></button>
+            </div>
+        </section>
     </div>
 
     <!-- Game Over Modal -->
-    <div class="modal" id="gameOverModal">
+    <div id="gameOverModal" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle">🎉 Selamat!</h2>
-            <p id="modalMessage">Anda berhasil memenangkan:</p>
-            <div class="final-prize" id="finalPrize">Rp 0</div>
-            <button class="restart-btn" onclick="restartGame()">🔄 Main Lagi</button>
-            <button class="close-btn" onclick="showLeaderboard()">🏆 Lihat Skor</button>
+            <span class="close-btn" onclick="restartGame()">&times;</span>
+            <h2 id="gameOverTitle">Game Over</h2>
+            <p id="gameOverMessage">Anda memenangkan Rp 0.</p>
+            <button class="btn" onclick="restartGame()">Kembali ke Menu</button>
         </div>
     </div>
 
     <!-- Leaderboard Modal -->
-    <div class="modal" id="leaderboardModal">
+    <div id="leaderboardModal" class="modal">
         <div class="modal-content">
-            <h2>🏆 PAPAN SKOR 🏆</h2>
-            <div id="leaderboardContent"></div>
-            <button class="close-btn" onclick="closeLeaderboard()">✖️ Tutup</button>
-            <button class="restart-btn" onclick="clearLeaderboard()">🗑️ Hapus Semua</button>
+            <span class="close-btn" onclick="closeLeaderboard()">&times;</span>
+            <h2>Papan Skor</h2>
+            <div id="leaderboardContent">
+                <p>Belum ada skor yang tersimpan.</p>
+            </div>
+            <button id="clearLeaderboardBtn" class="btn" onclick="clearLeaderboard()">Hapus Skor</button>
         </div>
     </div>
 
     <script>
-        // Audio State
-        let musicEnabled = true;
-        let sfxEnabled = true;
-        const bgMusic = document.getElementById('bgMusic');
-        const correctSound = document.getElementById('correctSound');
-        const wrongSound = document.getElementById('wrongSound');
-        const timeSound = document.getElementById('timeSound');
-
-        // Game State
-        let questions = {
-            easy: [],
-            medium: [],
-            hard: []
-        };
-
-        const prizes = [
-            { amount: 50000, level: 1, difficulty: 'easy' },
-            { amount: 100000, level: 2, difficulty: 'easy' },
-            { amount: 200000, level: 3, difficulty: 'easy' },
-            { amount: 300000, level: 4, difficulty: 'easy' },
-            { amount: 500000, level: 5, difficulty: 'easy', milestone: true },
-            { amount: 1000000, level: 6, difficulty: 'medium' },
-            { amount: 2000000, level: 7, difficulty: 'medium' },
-            { amount: 3000000, level: 8, difficulty: 'medium' },
-            { amount: 5000000, level: 9, difficulty: 'medium' },
-            { amount: 10000000, level: 10, difficulty: 'medium', milestone: true },
-            { amount: 20000000, level: 11, difficulty: 'hard' },
-            { amount: 50000000, level: 12, difficulty: 'hard' },
-            { amount: 100000000, level: 13, difficulty: 'hard' },
-            { amount: 500000000, level: 14, difficulty: 'hard' },
-            { amount: 1000000000, level: 15, difficulty: 'hard', milestone: true }
-        ];
-
-        let currentLevel = 0;
-        let currentQuestion = null;
+        // Variabel Global Game
+        let currentQuestionIndex = 0;
+        let score = 0;
         let playerName = '';
-        let lifelines = {
-            fifty: true,
-            phone: true,
-            audience: true
-        };
-        let usedQuestions = {
-            easy: [],
-            medium: [],
-            hard: []
-        };
-        let timer = null;
-        let timeLeft = 0;
-        let timeSoundPlayed = false;
+        let questions = [];
+        let backgroundMusic; // <-- [PERBAIKAN] Variabel untuk musik
 
-        // Auto-load default file
-        window.addEventListener('load', function() {
-            loadDefaultFile();
-        });
+        // Daftar Hadiah
+        const prizeLevels = [
+            0, 100000, 200000, 300000, 500000, 1000000, // 5
+            2000000, 4000000, 8000000, 10000000, 20000000, // 10
+            40000000, 60000000, 80000000, 100000000, 1000000000 // 15
+        ];
+        // Indeks (dimulai dari 0) dari level yang merupakan titik aman
+        const safeLevels = [5, 10]; 
+
+        // Fungsi format uang
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('id-ID').format(amount);
+        }
+
+        // Memuat file Excel bank soal default saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', loadDefaultFile);
 
         function loadDefaultFile() {
-            const loadStatus = document.getElementById('loadStatus');
-            loadStatus.textContent = '⏳ Memuat bank_soal.xlsx...';
-            loadStatus.className = '';
-
-            fetch('bank_soal.xlsx')
+            // Lokasi file bank soal default Anda
+            const defaultFilePath = 'bank_soal.xlsx';
+            
+            fetch(defaultFilePath)
                 .then(response => {
-                    if (!response.ok) throw new Error('File bank_soal.xlsx tidak ditemukan');
+                    if (!response.ok) {
+                        throw new Error("File default tidak ditemukan. Memuat soal cadangan.");
+                    }
                     return response.arrayBuffer();
                 })
                 .then(data => {
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
-                    parseQuestions(jsonData);
-                    
-                    if (questions.easy.length === 0 || questions.medium.length === 0 || questions.hard.length === 0) {
-                        throw new Error('File harus memiliki soal untuk semua tingkat kesulitan!');
-                    }
-
-                    loadStatus.textContent = `✅ Soal siap! (Mudah: ${questions.easy.length}, Sedang: ${questions.medium.length}, Sulit: ${questions.hard.length})`;
-                    loadStatus.className = 'success-message';
-                    document.getElementById('startBtn').style.display = 'inline-block';
+                    parseExcelData(data);
+                    document.getElementById('fileName').textContent = 'Bank Soal Default berhasil dimuat.';
                 })
                 .catch(error => {
-                    console.error('Error loading default file:', error);
-                    loadStatus.textContent = '⚠️ bank_soal.xlsx tidak ditemukan. Silakan upload file soal.';
-                    loadStatus.className = 'error-message';
+                    console.warn(error.message);
+                    loadDefaultQuestions(); // Muat soal hardcode jika fetch gagal
+                    document.getElementById('fileName').textContent = 'Gagal muat file default. Soal cadangan dimuat.';
                 });
         }
 
-        // File Upload Handler
-        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
-
-        function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const fileNameEl = document.getElementById('fileName');
-            fileNameEl.textContent = `📄 Memuat: ${file.name}...`;
-            fileNameEl.className = '';
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-
-                    parseQuestions(jsonData);
-                    
-                    if (questions.easy.length === 0 || questions.medium.length === 0 || questions.hard.length === 0) {
-                        throw new Error('File harus memiliki soal untuk semua tingkat kesulitan!');
-                    }
-
-                    fileNameEl.textContent = `✅ ${file.name} berhasil dimuat!`;
-                    fileNameEl.className = 'success-message';
-                    
-                    document.getElementById('loadStatus').textContent = `✅ Soal custom dimuat! (Mudah: ${questions.easy.length}, Sedang: ${questions.medium.length}, Sulit: ${questions.hard.length})`;
-                    document.getElementById('loadStatus').className = 'success-message';
-                    document.getElementById('startBtn').style.display = 'inline-block';
-                    
-                } catch (error) {
-                    fileNameEl.textContent = `❌ Error: ${error.message}`;
-                    fileNameEl.className = 'error-message';
-                }
-            };
-            
-            reader.onerror = function() {
-                document.getElementById('fileName').textContent = '❌ Gagal membaca file!';
-                document.getElementById('fileName').className = 'error-message';
-            };
-            
-            reader.readAsArrayBuffer(file);
+        // Soal cadangan jika file Excel gagal dimuat
+        function loadDefaultQuestions() {
+            questions = [
+                { SOAL: "Ibukota Indonesia?", A: "Jakarta", B: "Bandung", C: "Surabaya", D: "Medan", KUNCI: "A" },
+                { SOAL: "2 + 2 = ?", A: "3", B: "4", C: "5", D: "6", KUNCI: "B" },
+                { SOAL: "Mata uang Jepang?", A: "Won", B: "Dollar", C: "Yen", D: "Ringgit", KUNCI: "C" },
+                { SOAL: "Siapa presiden pertama Indonesia?", A: "Soeharto", B: "BJ Habibie", C: "Megawati", D: "Soekarno", KUNCI: "D" },
+                { SOAL: "Pulau terbesar di Indonesia?", A: "Jawa", B: "Sumatra", C: "Kalimantan", D: "Papua", KUNCI: "C" },
+                { SOAL: "Lagu kebangsaan Indonesia?", A: "Indonesia Raya", B: "Padamu Negeri", C: "Maju Tak Gentar", D: "Garuda Pancasila", KUNCI: "A" },
+                { SOAL: "Gunung tertinggi di dunia?", A: "K2", B: "Everest", C: "Kilimanjaro", D: "Jaya Wijaya", KUNCI: "B" },
+                { SOAL: "Berapa jumlah provinsi di Indonesia saat ini (2024)?", A: "34", B: "35", C: "37", D: "38", KUNCI: "D" },
+                { SOAL: "Apa kepanjangan dari CPU?", A: "Central Processing Unit", B: "Computer Personal Unit", C: "Central Power Unit", D: "Control Processing Unit", KUNCI: "A" },
+                { SOAL: "Planet terdekat dengan Matahari?", A: "Venus", B: "Mars", C: "Merkurius", D: "Bumi", KUNCI: "C" },
+                { SOAL: "Pencipta lampu bohlam?", A: "Albert Einstein", B: "Thomas Edison", C: "Nikola Tesla", D: "Alexander Graham Bell", KUNCI: "B" },
+                { SOAL: "Tahun berapa Indonesia merdeka?", A: "1942", B: "1945", C: "1949", D: "1950", KUNCI: "B" },
+                { SOAL: "Apa warna bendera Indonesia?", A: "Merah - Putih", B: "Putih - Merah", C: "Merah - Kuning", D: "Biru - Putih", KUNCI: "A" },
+                { SOAL: "Negara terluas di dunia?", A: "China", B: "Amerika Serikat", C: "Kanada", D: "Rusia", KUNCI: "D" },
+                { SOAL: "Samudra terluas di dunia?", A: "Atlantik", B: "Pasifik", C: "Hindia", D: "Arktik", KUNCI: "B" }
+            ];
+            // Acak soal cadangan
+            questions = shuffleArray(questions);
         }
 
-        function parseQuestions(data) {
-            questions = { easy: [], medium: [], hard: [] };
-            
-            for (let i = 1; i < data.length; i++) {
-                const row = data[i];
-                if (!row || row.length === 0) continue;
-
-                if (row[0] && row[1] && row[2]) {
-                    const options = row[1].toString().split(',').map(opt => opt.trim());
-                    if (options.length >= 4) {
-                        questions.easy.push({
-                            question: row[0].toString().trim(),
-                            options: options.slice(0, 4),
-                            answer: row[2].toString().trim()
-                        });
+        // Fungsi untuk menangani upload file custom
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('fileName').textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        parseExcelData(e.target.result);
+                    } catch (err) {
+                        alert("Gagal memproses file. Pastikan format kolom benar: SOAL, A, B, C, D, KUNCI.");
+                        loadDefaultFile(); // Kembali ke default jika file custom error
                     }
-                }
-
-                if (row[3] && row[4] && row[5]) {
-                    const options = row[4].toString().split(',').map(opt => opt.trim());
-                    if (options.length >= 4) {
-                        questions.medium.push({
-                            question: row[3].toString().trim(),
-                            options: options.slice(0, 4),
-                            answer: row[5].toString().trim()
-                        });
-                    }
-                }
-
-                if (row[6] && row[7] && row[8]) {
-                    const options = row[7].toString().split(',').map(opt => opt.trim());
-                    if (options.length >= 4) {
-                        questions.hard.push({
-                            question: row[6].toString().trim(),
-                            options: options.slice(0, 4),
-                            answer: row[8].toString().trim()
-                        });
-                    }
-                }
+                };
+                reader.readAsArrayBuffer(file);
             }
         }
+        
+        // Fungsi untuk mem-parsing data dari Excel
+        function parseExcelData(data) {
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonSoal = XLSX.utils.sheet_to_json(worksheet);
 
+            // Validasi data
+            if (jsonSoal.length < 15) {
+                alert("File Excel harus memiliki setidaknya 15 soal. Memuat soal default.");
+                loadDefaultQuestions();
+                return;
+            }
+
+            // Validasi kolom
+            const requiredCols = ['SOAL', 'A', 'B', 'C', 'D', 'KUNCI'];
+            const firstRow = jsonSoal[0];
+            for (const col of requiredCols) {
+                if (!(col in firstRow)) {
+                    alert(`Kolom "${col}" tidak ditemukan di file Excel. Memuat soal default.`);
+                    loadDefaultQuestions();
+                    return;
+                }
+            }
+
+            questions = shuffleArray(jsonSoal);
+            console.log("Soal berhasil dimuat dari file:", questions);
+        }
+
+        // Fungsi untuk mengacak array (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Fungsi untuk memulai game
         function startGame() {
-            const nameInput = document.getElementById('playerName').value.trim();
+            playerName = document.getElementById('playerName').value.trim();
+            if (playerName === '') {
+                alert('Silakan masukkan nama Anda!');
+                return;
+            }
+            if (!questions || questions.length < 15) {
+                alert('Bank Soal tidak cukup (minimal 15). Coba muat file lain atau gunakan default.');
+                return;
+            }
+
+            // --- [PERBAIKAN] MULAI MUSIK ---
+            // Hentikan musik lama jika ada (misal: dari game sebelumnya)
+            if (backgroundMusic) {
+                backgroundMusic.pause();
+            }
             
-            if (!nameInput) {
-                alert('⚠️ Silakan masukkan nama Anda terlebih dahulu!');
-                document.getElementById('playerName').focus();
-                return;
-            }
+            // Buat dan mainkan musik baru
+            // Pastikan file "musik.mp3" ada di folder yang sama di GitHub
+            backgroundMusic = new Audio('musik.mp3'); 
+            backgroundMusic.loop = true; // Agar musik berulang
+            backgroundMusic.volume = 0.3; // Atur volume (0.0 - 1.0)
+            
+            // Menggunakan .play() di dalam klik pengguna (startGame) akan berhasil
+            backgroundMusic.play().catch(error => {
+                // Tangani error jika browser tetap memblokir (jarang terjadi jika dipicu klik)
+                console.warn("Audio play dihentikan oleh browser:", error);
+            });
+            // --- [PERBAIKAN] SELESAI MUSIK ---
 
-            if (questions.easy.length === 0 || questions.medium.length === 0 || questions.hard.length === 0) {
-                alert('⚠️ Soal belum dimuat! Silakan tunggu atau upload file soal.');
-                return;
-            }
-
-            playerName = nameInput;
-            document.getElementById('playerNameDisplay').textContent = playerName;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            document.getElementById('playerNameDisplay').textContent = `Pemain: ${playerName}`;
             
             document.getElementById('startSection').style.display = 'none';
-            document.getElementById('gameContainer').style.display = 'grid';
+            document.getElementById('gameContainer').style.display = 'block';
             
-            if (musicEnabled) {
-                bgMusic.play().catch(e => console.log('Audio play prevented'));
-            }
+            buildPrizeList();
+            showQuestion();
+        }
+
+        // Fungsi untuk membangun daftar hadiah
+        function buildPrizeList() {
+            const prizeListUl = document.getElementById('prizeList');
+            prizeListUl.innerHTML = ''; // Kosongkan daftar
             
-            initGame();
-        }
-
-        function initGame() {
-            currentLevel = 0;
-            lifelines = { fifty: true, phone: true, audience: true };
-            usedQuestions = { easy: [], medium: [], hard: [] };
-            
-            renderPrizeLadder();
-            loadQuestion();
-        }
-
-        // Audio Functions
-        function toggleMusic() {
-            musicEnabled = !musicEnabled;
-            const btn = document.getElementById('musicToggle');
-            btn.classList.toggle('muted', !musicEnabled);
-            
-            if (musicEnabled) {
-                bgMusic.play().catch(e => console.log('Audio play failed:', e));
-            } else {
-                bgMusic.pause();
-            }
-        }
-
-        function toggleSFX() {
-            sfxEnabled = !sfxEnabled;
-            const btn = document.getElementById('sfxToggle');
-            btn.classList.toggle('muted', !sfxEnabled);
-        }
-
-        function playCorrectSound() {
-            if (sfxEnabled) {
-                correctSound.currentTime = 0;
-                correctSound.play().catch(e => console.log('Sound play failed:', e));
-            }
-        }
-
-        function playWrongSound() {
-            if (sfxEnabled) {
-                wrongSound.currentTime = 0;
-                wrongSound.play().catch(e => console.log('Sound play failed:', e));
-            }
-        }
-
-        function playTimeSound() {
-            if (sfxEnabled && !timeSoundPlayed) {
-                timeSound.currentTime = 0;
-                timeSound.play().catch(e => console.log('Sound play failed:', e));
-                timeSoundPlayed = true;
-            }
-        }
-
-        function stopTimeSound() {
-            timeSound.pause();
-            timeSound.currentTime = 0;
-            timeSoundPlayed = false;
-        }
-
-        function renderPrizeLadder() {
-            const prizeList = document.getElementById('prizeList');
-            prizeList.innerHTML = '';
-
-            for (let i = prizes.length - 1; i >= 0; i--) {
-                const prize = prizes[i];
-                const div = document.createElement('div');
-                div.className = 'prize-item';
+            // Kita buat dari atas ke bawah (level 15 ke 1)
+            for (let i = 15; i >= 1; i--) {
+                const li = document.createElement('li');
+                li.textContent = `${i}. Rp ${formatMoney(prizeLevels[i])}`;
                 
-                if (prize.milestone) div.classList.add('milestone');
-                if (i === currentLevel) div.classList.add('current');
-                else if (i < currentLevel) div.classList.add('passed');
-
-                div.innerHTML = `
-                    <span class="prize-number">${prize.level}</span>
-                    <span class="prize-amount">Rp ${formatMoney(prize.amount)}</span>
-                `;
-                prizeList.appendChild(div);
+                if (safeLevels.includes(i)) {
+                    li.classList.add('safe');
+                }
+                
+                if (i === (currentQuestionIndex + 1)) {
+                    li.classList.add('current');
+                }
+                
+                prizeListUl.appendChild(li);
             }
         }
 
-        function formatMoney(amount) {
-            return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        function loadQuestion() {
-            if (currentLevel >= prizes.length) {
-                endGame(true);
+        // Fungsi untuk menampilkan pertanyaan
+        function showQuestion() {
+            if (currentQuestionIndex >= 15) {
+                // Jika sudah 15 soal, pemain menang
+                showGameOverModal(true); // true = menang
                 return;
             }
 
-            const currentPrize = prizes[currentLevel];
-            const difficulty = currentPrize.difficulty;
+            // Reset tampilan tombol jawaban
+            resetAnswerButtons();
+
+            const q = questions[currentQuestionIndex];
             
-            const availableQuestions = questions[difficulty].filter((q, idx) => 
-                !usedQuestions[difficulty].includes(idx)
-            );
-
-            if (availableQuestions.length === 0) {
-                alert('Soal habis untuk tingkat kesulitan ini!');
-                endGame(false);
-                return;
-            }
-
-            const randomIndex = Math.floor(Math.random() * availableQuestions.length);
-            const questionObj = availableQuestions[randomIndex];
+            document.getElementById('questionText').textContent = q.SOAL;
+            document.getElementById('answerA_text').textContent = q.A;
+            document.getElementById('answerB_text').textContent = q.B;
+            document.getElementById('answerC_text').textContent = q.C;
+            document.getElementById('answerD_text').textContent = q.D;
             
-            const originalIndex = questions[difficulty].indexOf(questionObj);
-            usedQuestions[difficulty].push(originalIndex);
-
-            currentQuestion = {
-                ...questionObj,
-                difficulty: difficulty
-            };
-
-            displayQuestion();
-            updateCurrentPrize();
-            renderPrizeLadder();
-            startTimer();
+            document.getElementById('questionNumber').textContent = `Soal ${currentQuestionIndex + 1} / 15`;
+            document.getElementById('currentPrize').textContent = `Hadiah: Rp ${formatMoney(prizeLevels[currentQuestionIndex + 1])}`;
+            
+            // Update daftar hadiah
+            buildPrizeList();
         }
 
-        function displayQuestion() {
-            document.getElementById('questionText').textContent = currentQuestion.question;
-            document.getElementById('audiencePoll').innerHTML = '';
-
-            const optionsContainer = document.getElementById('optionsContainer');
-            optionsContainer.innerHTML = '';
-
-            const labels = ['A', 'B', 'C', 'D'];
-            currentQuestion.options.forEach((option, index) => {
-                const div = document.createElement('div');
-                div.className = 'option';
-                div.dataset.index = index;
-                div.dataset.value = option;
-                div.onclick = () => selectOption(index);
-
-                div.innerHTML = `
-                    <span class="option-label">${labels[index]}</span>
-                    <span class="option-text">${option}</span>
-                `;
-                optionsContainer.appendChild(div);
+        // Fungsi untuk mereset warna tombol jawaban
+        function resetAnswerButtons() {
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'wrong');
+                btn.disabled = false;
             });
-
-            document.getElementById('lifeline5050').classList.toggle('used', !lifelines.fifty);
-            document.getElementById('lifelinePhone').classList.toggle('used', !lifelines.phone);
-            document.getElementById('lifelineAudience').classList.toggle('used', !lifelines.audience);
         }
 
-        function startTimer() {
-            clearInterval(timer);
-            stopTimeSound();
-            timeLeft = 60;
-            updateTimerDisplay();
+        // Fungsi saat pemain memilih jawaban
+        function selectAnswer(selectedOption) {
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => btn.disabled = true); // Matikan semua tombol
 
-            timer = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
+            const selectedBtn = document.getElementById(`answer${selectedOption}`);
+            selectedBtn.classList.add('selected'); // Tandai yang dipilih
 
-                if (timeLeft === 10) {
-                    playTimeSound();
-                }
+            const q = questions[currentQuestionIndex];
+            const correctAnswer = q.KUNCI.toUpperCase();
 
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    stopTimeSound();
-                    wrongAnswer();
-                }
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            const timerEl = document.getElementById('timer');
-            timerEl.textContent = `⏱️ ${timeLeft}s`;
-            timerEl.classList.toggle('warning', timeLeft <= 10);
-        }
-
-        function updateCurrentPrize() {
-            const currentPrize = prizes[currentLevel];
-            document.getElementById('currentPrize').textContent = 
-                `Rp ${formatMoney(currentPrize.amount)}`;
-        }
-
-        function selectOption(index) {
-            clearInterval(timer);
-            stopTimeSound();
-            
-            const options = document.querySelectorAll('.option');
-            options.forEach(opt => opt.onclick = null);
-
-            const selectedOption = options[index];
-            selectedOption.classList.add('selected');
-
+            // Jeda untuk efek dramatis
             setTimeout(() => {
-                const selectedValue = selectedOption.dataset.value;
-                if (selectedValue === currentQuestion.answer) {
-                    correctAnswer(selectedOption);
+                if (selectedOption === correctAnswer) {
+                    // Jawaban Benar
+                    selectedBtn.classList.remove('selected');
+                    selectedBtn.classList.add('correct');
+                    
+                    // Jeda lagi sebelum lanjut
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        score = prizeLevels[currentQuestionIndex]; // Skor adalah hadiah di level saat ini
+                        showQuestion(); // Tampilkan soal berikutnya
+                    }, 1500);
+
                 } else {
-                    wrongAnswer(selectedOption, selectedValue);
+                    // Jawaban Salah
+                    selectedBtn.classList.remove('selected');
+                    selectedBtn.classList.add('wrong');
+                    
+                    // Tampilkan jawaban yang benar
+                    const correctBtn = document.getElementById(`answer${correctAnswer}`);
+                    correctBtn.classList.add('correct');
+
+                    // Jeda sebelum game over
+                    setTimeout(() => {
+                        showGameOverModal(false); // false = kalah
+                    }, 2000);
                 }
-            }, 1500);
+            }, 1000); // Jeda 1 detik setelah memilih
         }
 
-        function correctAnswer(selectedOption) {
-            playCorrectSound();
-            selectedOption.classList.remove('selected');
-            selectedOption.classList.add('correct');
-
-            setTimeout(() => {
-                currentLevel++;
-                if (currentLevel >= prizes.length) {
-                    endGame(true);
-                } else {
-                    loadQuestion();
-                }
-            }, 2000);
-        }
-
-        function wrongAnswer(selectedOption = null, selectedValue = null) {
-            playWrongSound();
-            
-            if (selectedOption) {
-                selectedOption.classList.remove('selected');
-                selectedOption.classList.add('wrong');
+        // Fungsi untuk menampilkan modal Game Over
+        function showGameOverModal(isWinner) {
+            // --- [PERBAIKAN] HENTIKAN MUSIK ---
+            if (backgroundMusic) {
+                backgroundMusic.pause();
+                backgroundMusic.currentTime = 0; // Reset musik ke awal
             }
+            // --- [PERBAIKAN] SELESAI MUSIK ---
 
-            const options = document.querySelectorAll('.option');
-            options.forEach(opt => {
-                if (opt.dataset.value === currentQuestion.answer) {
-                    opt.classList.add('correct');
-                }
-            });
-
-            setTimeout(() => {
-                endGame(false);
-            }, 3000);
-        }
-
-        function use5050() {
-            if (!lifelines.fifty) return;
-            lifelines.fifty = false;
-            document.getElementById('lifeline5050').classList.add('used');
-
-            const options = document.querySelectorAll('.option');
-            const correctAnswer = currentQuestion.answer;
-            let removed = 0;
-
-            const optionsArray = Array.from(options);
-            optionsArray.sort(() => Math.random() - 0.5);
-
-            optionsArray.forEach(opt => {
-                if (opt.dataset.value !== correctAnswer && removed < 2) {
-                    opt.classList.add('disabled');
-                    opt.onclick = null;
-                    removed++;
-                }
-            });
-        }
-
-        function phoneAFriend() {
-            if (!lifelines.phone) return;
-            lifelines.phone = false;
-            document.getElementById('lifelinePhone').classList.add('used');
-
-            const correctAnswer = currentQuestion.answer;
-            const options = currentQuestion.options;
-            
-            const friendAnswer = Math.random() < 0.8 ? 
-                correctAnswer : 
-                options[Math.floor(Math.random() * options.length)];
-
-            alert(`📞 Teman: "Saya ${Math.random() < 0.8 ? 'yakin' : 'rasa'} jawabannya ${friendAnswer}"`);
-        }
-
-        function askAudience() {
-            if (!lifelines.audience) return;
-            lifelines.audience = false;
-            document.getElementById('lifelineAudience').classList.add('used');
-
-            const correctAnswer = currentQuestion.answer;
-            const options = currentQuestion.options;
-            const labels = ['A', 'B', 'C', 'D'];
-
-            let polls = options.map((opt, idx) => ({
-                label: labels[idx],
-                option: opt,
-                percentage: Math.random() * 30
-            }));
-
-            const correctIndex = options.indexOf(correctAnswer);
-            polls[correctIndex].percentage = 40 + Math.random() * 40;
-
-            const total = polls.reduce((sum, p) => sum + p.percentage, 0);
-            polls.forEach(p => p.percentage = Math.round((p.percentage / total) * 100));
-
-            const pollHTML = `
-                <div class="audience-poll">
-                    <h3>📊 Hasil Polling:</h3>
-                    ${polls.map(p => `
-                        <div class="poll-bar">
-                            <span class="poll-label">${p.label}:</span>
-                            <div class="poll-progress">
-                                <div class="poll-fill" style="width: ${p.percentage}%">
-                                    ${p.percentage}%
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            document.getElementById('audiencePoll').innerHTML = pollHTML;
-        }
-
-        function quitGame() {
-            if (currentLevel === 0) {
-                alert('Anda belum menjawab pertanyaan apapun!');
-                return;
-            }
-
-            const confirmQuit = confirm('Anda yakin ingin berhenti dan mengambil uang?');
-            if (confirmQuit) {
-                clearInterval(timer);
-                stopTimeSound();
-                endGame(false, true);
-            }
-        }
-
-        function endGame(won, quit = false) {
-            clearInterval(timer);
-            stopTimeSound();
-            
             const modal = document.getElementById('gameOverModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalMessage = document.getElementById('modalMessage');
-            const finalPrize = document.getElementById('finalPrize');
+            const title = document.getElementById('gameOverTitle');
+            const message = document.getElementById('gameOverMessage');
+            
+            let finalPrize = 0;
 
-            let prizeWon = 0;
-            let title = '';
-            let message = '';
-
-            if (won) {
-                playCorrectSound();
-                prizeWon = prizes[prizes.length - 1].amount;
-                title = '🎉 ANDA MENANG! 🎉';
-                message = 'Selamat! Anda menjawab semua pertanyaan!';
-            } else if (quit) {
-                prizeWon = currentLevel > 0 ? prizes[currentLevel - 1].amount : 0;
-                title = '💰 Ambil Uang';
-                message = 'Terima kasih sudah bermain!';
+            if (isWinner) {
+                // Pemain menang 1 Miliar
+                finalPrize = prizeLevels[15];
+                title.textContent = "SELAMAT, ANDA MILIARDER!";
+                message.textContent = `Anda telah menjawab semua 15 soal dengan benar dan memenangkan hadiah utama: Rp ${formatMoney(finalPrize)}!`;
             } else {
-                for (let i = currentLevel - 1; i >= 0; i--) {
-                    if (prizes[i].milestone) {
-                        prizeWon = prizes[i].amount;
-                        break;
+                // Pemain kalah, cek titik aman
+                title.textContent = "Game Over";
+                
+                // Cari titik aman terakhir yang dilewati
+                let safePrize = 0;
+                for (const safeLevel of safeLevels) {
+                    if (currentQuestionIndex >= safeLevel) {
+                        safePrize = prizeLevels[safeLevel];
                     }
                 }
-                title = '😢 Sayang Sekali!';
-                message = 'Jawaban salah. Anda membawa:';
+                finalPrize = safePrize;
+                message.textContent = `Jawaban Anda salah. Anda pulang dengan membawa: Rp ${formatMoney(finalPrize)}.`;
             }
 
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            finalPrize.textContent = `Rp ${formatMoney(prizeWon)}`;
-
-            // Save to leaderboard
-            saveScore(playerName, prizeWon, currentLevel);
+            // Simpan skor jika menang atau dapat hadiah
+            if (finalPrize > 0 || isWinner) {
+                saveScore(finalPrize, isWinner ? 15 : currentQuestionIndex);
+            }
 
             modal.style.display = 'flex';
         }
-
-        // Leaderboard Functions
-        function saveScore(name, prize, level) {
-            let leaderboard = JSON.parse(localStorage.getItem('millionaireScores') || '[]');
+        
+        // Fungsi untuk menyimpan skor
+        function saveScore(prize, level) {
+            const scores = JSON.parse(localStorage.getItem('millionaireScores')) || [];
             
-            leaderboard.push({
-                name: name,
+            const newScore = {
+                name: playerName,
                 prize: prize,
                 level: level,
                 date: new Date().toLocaleString('id-ID')
-            });
+            };
+            
+            scores.push(newScore);
+            
+            // Urutkan skor dari yang tertinggi
+            scores.sort((a, b) => b.prize - a.prize);
 
-            leaderboard.sort((a, b) => b.prize - a.prize);
-            leaderboard = leaderboard.slice(0, 10); // Keep top 10
-
-            localStorage.setItem('millionaireScores', JSON.stringify(leaderboard));
+            // Simpan hanya 10 skor teratas
+            localStorage.setItem('millionaireScores', JSON.stringify(scores.slice(0, 10)));
         }
 
+        // Fungsi untuk menampilkan papan skor
         function showLeaderboard() {
-            document.getElementById('gameOverModal').style.display = 'none';
+            const scores = JSON.parse(localStorage.getItem('millionaireScores')) || [];
+            const contentDiv = document.getElementById('leaderboardContent');
             
-            const leaderboard = JSON.parse(localStorage.getItem('millionaireScores') || '[]');
-            const content = document.getElementById('leaderboardContent');
-
-            if (leaderboard.length === 0) {
-                content.innerHTML = '<div class="no-scores">Belum ada skor yang tercatat</div>';
+            if (scores.length === 0) {
+                contentDiv.innerHTML = '<p>Belum ada skor yang tersimpan.</p>';
             } else {
                 const medals = ['🥇', '🥈', '🥉'];
-                content.innerHTML = `
-                    <table class="leaderboard-table">
+                contentDiv.innerHTML = `
+                    <table id="leaderboardTable">
                         <thead>
                             <tr>
                                 <th>Rank</th>
@@ -1456,7 +803,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${leaderboard.map((score, index) => `
+                            ${scores.map((score, index) => `
                                 <tr>
                                     <td>
                                         <span class="rank-medal">${medals[index] || (index + 1)}</span>
@@ -1480,21 +827,30 @@
         }
 
         function clearLeaderboard() {
+            // Catatan: confirm() mungkin diblokir di beberapa lingkungan. 
+            // Untuk GitHub Pages biasa, ini seharusnya berfungsi.
             if (confirm('Anda yakin ingin menghapus semua skor?')) {
                 localStorage.removeItem('millionaireScores');
-                showLeaderboard();
+                showLeaderboard(); // Refresh tampilan papan skor
             }
         }
 
+        // Fungsi untuk kembali ke menu awal
         function restartGame() {
+            // --- [PERBAIKAN] HENTIKAN MUSIK ---
+            if (backgroundMusic) {
+                backgroundMusic.pause();
+                backgroundMusic.currentTime = 0; // Reset musik ke awal
+            }
+            // --- [PERBAIKAN] SELESAI MUSIK ---
+
             document.getElementById('gameOverModal').style.display = 'none';
             document.getElementById('gameContainer').style.display = 'none';
             document.getElementById('startSection').style.display = 'block';
             document.getElementById('playerName').value = '';
-            document.getElementById('fileName').textContent = '';
-            document.getElementById('fileInput').value = '';
             
-            // Reload default file
+            // Tidak perlu reset file input, biarkan bank soal default yang sudah dimuat
+            // Cukup panggil loadDefaultFile() untuk memastikan soal default siap
             loadDefaultFile();
         }
     </script>
