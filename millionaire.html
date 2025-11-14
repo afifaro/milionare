@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Who Wants to Be a Millionaire - Indonesia</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a4d 0%, #0d0d26 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 10px;
+            background: linear-gradient(90deg, #ff6b00, #ffaa00);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 15px rgba(255, 170, 0, 0.4);
+        }
+
+        .header h1 {
+            font-size: clamp(1rem, 4vw, 1.8rem);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header p {
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            margin-top: 5px;
+        }
+
+        /* Audio Controls */
+        .audio-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 999;
+            display: flex;
+            gap: 8px;
+        }
+
+        .audio-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #ffaa00;
+            background: rgba(26, 26, 77, 0.9);
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .audio-btn:hover {
+            background: #ffaa00;
+            transform: scale(1.1);
+        }
+
+        .audio-btn.muted {
+            opacity: 0.5;
+        }
+
+        /* Leaderboard Button */
+        .leaderboard-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 999;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #ffaa00;
+            background: rgba(26, 26, 77, 0.9);
+            color: white;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .leaderboard-btn:hover {
+            background: #ffaa00;
+            transform: scale(1.1);
+        }
+
+        /* Start Section */
+        .start-section {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .start-section h2 {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            margin-bottom: 20px;
+            color: #ffaa00;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            color: #ffaa00;
+        }
+
+        .input-group input {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px 20px;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            border: 2px solid #ffaa00;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-align: center;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
+        }
+
+        .upload-btn, .start-btn {
+            padding: 12px 30px;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            background: linear-gradient(90deg, #00ff88, #00cc6f);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.3s;
+            margin: 10px 5px;
+        }
+
+        .upload-btn:hover, .start-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .start-btn {
+            background: linear-gradient(90deg, #ff6b00, #ffaa00);
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            padding: 15px 40px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Game Layout */
+        .game-container {
+            display: none;
+            grid-template-columns: 1fr 250px;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 968px) {
+            .game-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Main Game Area */
+        .main-game {
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Player Info */
+        .player-info {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        /* Question Box */
+        .question-box {
+            background: linear-gradient(135deg, #2d2d6d, #1a1a4d);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #ffaa00;
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.3);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question-text {
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* Current Prize Display */
+        .current-prize {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: #ffaa00;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+        }
+
+        /* Options - 3D Style */
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+            perspective: 1000px;
+        }
+
+        @media (max-width: 600px) {
+            .options {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+
+        .option {
+            background: linear-gradient(145deg, #2d2d6d, #1a1a4d);
+            border: 3px solid #4d4d9d;
+            border-radius: 12px;
+            padding: 15px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            box-shadow: 
+                5px 5px 15px rgba(0, 0, 0, 0.5),
+                -5px -5px 15px rgba(77, 77, 157, 0.1),
+                inset 0 0 10px rgba(77, 77, 157, 0.1);
+            transform-style: preserve-3d;
+        }
+
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 170, 0, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .option:hover:not(.disabled)::before {
+            left: 100%;
+        }
+
+        .option:hover:not(.disabled) {
+            border-color: #ffaa00;
+            transform: translateY(-5px) translateZ(20px);
+            box-shadow: 
+                8px 8px 20px rgba(0, 0, 0, 0.6),
+                -8px -8px 20px rgba(77, 77, 157, 0.2),
+                0 5px 25px rgba(255, 170, 0, 0.5),
+                inset 0 0 15px rgba(255, 170, 0, 0.2);
+        }
+
+        .option-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            min-width: 35px;
+            background: linear-gradient(145deg, #ffaa00, #ff8800);
+            color: #1a1a4d;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            box-shadow: 
+                3px 3px 8px rgba(0, 0, 0, 0.4),
+                -2px -2px 6px rgba(255, 200, 100, 0.5),
+                inset 0 0 5px rgba(255, 255, 255, 0.3);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .option-text {
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            flex: 1;
+            word-wrap: break-word;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .option.selected {
+            border-color: #ffaa00;
+            background: linear-gradient(145deg, #665500, #997700);
+            animation: pulse 1s infinite;
+            box-shadow: 
+                0 0 20px rgba(255, 170, 0, 0.8),
+                inset 0 0 20px rgba(255, 170, 0, 0.3);
+        }
+
+        .option.correct {
+            border-color: #00ff88;
+            background: linear-gradient(145deg, #006644, #009966);
+            box-shadow: 
+                0 0 25px rgba(0, 255, 136, 0.8),
+                inset 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .option.correct .option-label {
+            background: linear-gradient(145deg, #00ff88, #00cc6f);
+        }
+
+        .option.wrong {
+            border-color: #ff0000;
+            background: linear-gradient(145deg, #660000, #990000);
+            box-shadow: 
+                0 0 25px rgba(255, 0, 0, 0.8),
+                inset 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .option.wrong .option-label {
+            background: linear-gradient(145deg, #ff4444, #cc0000);
+        }
+
+        .option.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: scale(0.95);
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: translateY(-5px) scale(1);
+            }
+            50% { 
+                opacity: 0.8;
+                transform: translateY(-5px) scale(1.02);
+            }
+        }
+
+        /* Lifelines */
+        .lifelines {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .lifeline-btn {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #6600cc, #9933ff);
+            border: 2px solid #9933ff;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: clamp(0.75rem, 2vw, 0.9rem);
+        }
+
+        .lifeline-btn:hover:not(.used) {
+            transform: scale(1.05);
+            box-shadow: 0 3px 12px rgba(153, 51, 255, 0.4);
+        }
+
+        .lifeline-btn.used {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Prize Ladder */
+        .prize-ladder {
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 10px;
+            backdrop-filter: blur(10px);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .prize-ladder h3 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #ffaa00;
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+        }
+
+        .prize-item {
+            padding: 6px 10px;
+            margin: 3px 0;
+            background: rgba(77, 77, 157, 0.3);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: clamp(0.75rem, 2vw, 0.9rem);
+        }
+
+        .prize-item.current {
+            background: linear-gradient(90deg, #ff6b00, #ffaa00);
+            border-color: #ffaa00;
+            font-weight: bold;
+            animation: glow 1.5s infinite;
+        }
+
+        .prize-item.passed {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .prize-item.milestone {
+            background: rgba(255, 170, 0, 0.3);
+            border-left: 3px solid #ffaa00;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 3px rgba(255, 170, 0, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(255, 170, 0, 0.8); }
+        }
+
+        .prize-number {
+            font-weight: bold;
+            color: #ffaa00;
+        }
+
+        .prize-amount {
+            font-weight: bold;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a4d, #0d0d26);
+            padding: 25px 20px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            border: 3px solid #ffaa00;
+            box-shadow: 0 0 30px rgba(255, 170, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            margin-bottom: 15px;
+            color: #ffaa00;
+        }
+
+        .modal-content p {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+        }
+
+        .modal-content .final-prize {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            color: #00ff88;
+            margin: 15px 0;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .restart-btn, .close-btn {
+            padding: 10px 25px;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            background: linear-gradient(90deg, #00ff88, #00cc6f);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            margin: 8px 5px;
+            transition: transform 0.3s;
+        }
+
+        .restart-btn:hover, .close-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .close-btn {
+            background: linear-gradient(90deg, #ff6b00, #ffaa00);
+        }
+
+        /* Leaderboard */
+        .leaderboard-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 170, 0, 0.3);
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+        }
+
+        .leaderboard-table th {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+            font-weight: bold;
+        }
+
+        .leaderboard-table tr:hover {
+            background: rgba(255, 170, 0, 0.1);
+        }
+
+        .rank-medal {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+
+        .no-scores {
+            text-align: center;
+            padding: 30px;
+            color: #ffaa00;
+            font-style: italic;
+        }
+
+        /* Timer */
+        .timer {
+            text-align: center;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: #ff6b00;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .timer.warning {
+            color: #ff0000;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Audience Poll */
+        .audience-poll {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .audience-poll h3 {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            margin-bottom: 10px;
+        }
+
+        .poll-bar {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .poll-label {
+            width: 25px;
+            font-weight: bold;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+        }
+
+        .poll-progress {
+            flex: 1;
+            height: 25px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .poll-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00cc6f);
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            font-weight: bold;
+            font-size: clamp(0.75rem, 2vw, 0.85rem);
+        }
+
+        /* Instructions */
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #ffaa00;
+            margin-bottom: 8px;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+            line-height: 1.6;
+            font-size: clamp(0.75rem, 2vw, 0.9rem);
+        }
+
+        .quit-btn {
+            padding: 8px 20px;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            background: linear-gradient(90deg, #ff6b00, #ffaa00);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+
+        .quit-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .success-message {
+            color: #00ff88;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            color: #ff6b00;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ffaa00;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 968px) {
+            .prize-ladder {
+                max-height: 300px;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Audio Elements -->
+    <audio id="bgMusic" loop>
+        <source src="musik.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="correctSound">
+        <source src="benar.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="wrongSound">
+        <source src="salah.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="timeSound">
+        <source src="waktu.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Leaderboard Button -->
+    <button class="leaderboard-btn" onclick="showLeaderboard()" title="Papan Skor">
+        🏆
+    </button>
+
+    <!-- Audio Controls -->
+    <div class="audio-controls">
+        <button class="audio-btn" id="musicToggle" onclick="toggleMusic()" title="Musik Latar">
+            🎵
+        </button>
+        <button class="audio-btn" id="sfxToggle" onclick="toggleSFX()" title="Efek Suara">
+            🔊
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎮 WHO WANTS TO BE A MILLIONAIRE 🎮</h1>
+            <p>Edisi Indonesia - Raih Hadiah 1 Miliar Rupiah!</p>
+        </div>
+
+        <!-- Start Section -->
+        <div class="start-section" id="startSection">
+            <h2>🎯 Selamat Datang!</h2>
+            
+            <div class="input-group">
+                <label for="playerName">📝 Masukkan Nama Anda:</label>
+                <input type="text" id="playerName" placeholder="Nama Anda" maxlength="20">
+            </div>
+
+            <div class="instructions">
+                <h3>📊 Format File Excel:</h3>
+                <ul>
+                    <li><strong>Kolom A-C:</strong> Soal Mudah</li>
+                    <li><strong>Kolom D-F:</strong> Soal Sedang</li>
+                    <li><strong>Kolom G-I:</strong> Soal Sulit</li>
+                    <li><strong>Opsi:</strong> Pisahkan dengan koma (,)</li>
+                    <li><strong>Baris 1:</strong> Diabaikan (header)</li>
+                </ul>
+            </div>
+
+            <p id="loadStatus" class="success-message"></p>
+
+            <div style="margin-top: 20px;">
+                <input type="file" id="fileInput" accept=".xlsx, .xls">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    📁 Upload Soal Sendiri
+                </button>
+                <p id="fileName" style="margin-top: 10px; font-size: 0.9rem;"></p>
+            </div>
+
+            <button class="start-btn" id="startBtn" onclick="startGame()">
+                🎮 MULAI PERMAINAN
+            </button>
+        </div>
+
+        <!-- Game Container -->
+        <div class="game-container" id="gameContainer">
+            <div class="main-game">
+                <div class="player-info">
+                    👤 <span id="playerNameDisplay"></span>
+                </div>
+
+                <div class="current-prize">
+                    💰 <span id="currentPrize">Rp 50.000</span>
+                </div>
+
+                <div class="timer" id="timer"></div>
+
+                <div class="question-box">
+                    <div class="question-text" id="questionText">
+                        Selamat datang! Siap menjadi jutawan?
+                    </div>
+                </div>
+
+                <div class="lifelines">
+                    <button class="lifeline-btn" id="lifeline5050" onclick="use5050()">
+                        ➗ 50:50
+                    </button>
+                    <button class="lifeline-btn" id="lifelinePhone" onclick="phoneAFriend()">
+                        📞 Telepon
+                    </button>
+                    <button class="lifeline-btn" id="lifelineAudience" onclick="askAudience()">
+                        👥 Penonton
+                    </button>
+                </div>
+
+                <div id="audiencePoll"></div>
+
+                <div class="options" id="optionsContainer"></div>
+
+                <div style="text-align: center;">
+                    <button class="quit-btn" onclick="quitGame()">
+                        💰 Ambil Uang & Berhenti
+                    </button>
+                </div>
+            </div>
+
+            <div class="prize-ladder" id="prizeLadder">
+                <h3>💎 Tangga Hadiah</h3>
+                <div id="prizeList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">🎉 Selamat!</h2>
+            <p id="modalMessage">Anda berhasil memenangkan:</p>
+            <div class="final-prize" id="finalPrize">Rp 0</div>
+            <button class="restart-btn" onclick="restartGame()">🔄 Main Lagi</button>
+            <button class="close-btn" onclick="showLeaderboard()">🏆 Lihat Skor</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div class="modal" id="leaderboardModal">
+        <div class="modal-content">
+            <h2>🏆 PAPAN SKOR 🏆</h2>
+            <div id="leaderboardContent"></div>
+            <button class="close-btn" onclick="closeLeaderboard()">✖️ Tutup</button>
+            <button class="restart-btn" onclick="clearLeaderboard()">🗑️ Hapus Semua</button>
+        </div>
+    </div>
+
+    <script>
+        // Audio State
+        let musicEnabled = true;
+        let sfxEnabled = true;
+        const bgMusic = document.getElementById('bgMusic');
+        const correctSound = document.getElementById('correctSound');
+        const wrongSound = document.getElementById('wrongSound');
+        const timeSound = document.getElementById('timeSound');
+
+        // Game State
+        let questions = {
+            easy: [],
+            medium: [],
+            hard: []
+        };
+
+        const prizes = [
+            { amount: 50000, level: 1, difficulty: 'easy' },
+            { amount: 100000, level: 2, difficulty: 'easy' },
+            { amount: 200000, level: 3, difficulty: 'easy' },
+            { amount: 300000, level: 4, difficulty: 'easy' },
+            { amount: 500000, level: 5, difficulty: 'easy', milestone: true },
+            { amount: 1000000, level: 6, difficulty: 'medium' },
+            { amount: 2000000, level: 7, difficulty: 'medium' },
+            { amount: 3000000, level: 8, difficulty: 'medium' },
+            { amount: 5000000, level: 9, difficulty: 'medium' },
+            { amount: 10000000, level: 10, difficulty: 'medium', milestone: true },
+            { amount: 20000000, level: 11, difficulty: 'hard' },
+            { amount: 50000000, level: 12, difficulty: 'hard' },
+            { amount: 100000000, level: 13, difficulty: 'hard' },
+            { amount: 500000000, level: 14, difficulty: 'hard' },
+            { amount: 1000000000, level: 15, difficulty: 'hard', milestone: true }
+        ];
+
+        let currentLevel = 0;
+        let currentQuestion = null;
+        let playerName = '';
+        let lifelines = {
+            fifty: true,
+            phone: true,
+            audience: true
+        };
+        let usedQuestions = {
+            easy: [],
+            medium: [],
+            hard: []
+        };
+        let timer = null;
+        let timeLeft = 0;
+        let timeSoundPlayed = false;
+
+        // Auto-load default file
+        window.addEventListener('load', function() {
+            loadDefaultFile();
+        });
+
+        function loadDefaultFile() {
+            const loadStatus = document.getElementById('loadStatus');
+            loadStatus.textContent = '⏳ Memuat bank_soal.xlsx...';
+            loadStatus.className = '';
+
+            fetch('bank_soal.xlsx')
+                .then(response => {
+                    if (!response.ok) throw new Error('File bank_soal.xlsx tidak ditemukan');
+                    return response.arrayBuffer();
+                })
+                .then(data => {
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    parseQuestions(jsonData);
+                    
+                    if (questions.easy.length === 0 || questions.medium.length === 0 || questions.hard.length === 0) {
+                        throw new Error('File harus memiliki soal untuk semua tingkat kesulitan!');
+                    }
+
+                    loadStatus.textContent = `✅ Soal siap! (Mudah: ${questions.easy.length}, Sedang: ${questions.medium.length}, Sulit: ${questions.hard.length})`;
+                    loadStatus.className = 'success-message';
+                    document.getElementById('startBtn').style.display = 'inline-block';
+                })
+                .catch(error => {
+                    console.error('Error loading default file:', error);
+                    loadStatus.textContent = '⚠️ bank_soal.xlsx tidak ditemukan. Silakan upload file soal.';
+                    loadStatus.className = 'error-message';
+                });
+        }
+
+        // File Upload Handler
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const fileNameEl = document.getElementById('fileName');
+            fileNameEl.textContent = `📄 Memuat: ${file.name}...`;
+            fileNameEl.className = '';
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                    parseQuestions(jsonData);
+                    
+                    if (questions.easy.length === 0 || questions.medium.length === 0 || questions.hard.length === 0) {
+                        throw new Error('File harus memiliki soal untuk semua tingkat kesulitan!');
+                    }
+
+                    fileNameEl.textContent = `✅ ${file.name} berhasil dimuat!`;
+                    fileNameEl.className = 'success-message';
+                    
+                    document.getElementById('loadStatus').textContent = `✅ Soal custom dimuat! (Mudah: ${questions.easy.length}, Sedang: ${questions.medium.length}, Sulit: ${questions.hard.length})`;
+                    document.getElementById('loadStatus').className = 'success-message';
+                    document.getElementById('startBtn').style.display = 'inline-block';
+                    
+                } catch (error) {
+                    fileNameEl.textContent = `❌ Error: ${error.message}`;
+                    fileNameEl.className = 'error-message';
+                }
+            };
+            
+            reader.onerror = function() {
+                document.getElementById('fileName').textContent = '❌ Gagal membaca file!';
+                document.getElementById('fileName').className = 'error-message';
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseQuestions(data) {
+            questions = { easy: [], medium: [], hard: [] };
+            
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+
+                if (row[0] && row[1] && row[2]) {
+                    const options = row[1].toString().split(',').map(opt => opt.trim());
+                    if (options.length >= 4) {
+                        questions.easy.push({
+                            question: row[0].toString().trim(),
+                            options: options.slice(0, 4),
+                            answer: row[2].toString().trim()
+                        });
+                    }
+                }
+
+                if (row[3] && row[4] && row[5]) {
+                    const options = row[4].toString().split(',').map(opt => opt.trim());
+                    if (options.length >= 4) {
+                        questions.medium.push({
+                            question: row[3].toString().trim(),
+                            options: options.slice(0, 4),
+                            answer: row[5].toString().trim()
+                        });
+                    }
+                }
+
+                if (row[6] && row[7] && row[8]) {
+                    const options = row[7].toString().split(',').map(opt => opt.trim());
+                    if (options.length >= 4) {
+                        questions.hard.push({
+                            question: row[6].toString().trim(),
+                            options: options.slice(0, 4),
+                            answer: row[8].toString().trim()
+                        });
+                    }
+                }
+            }
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('playerName').value.trim();
+            
+            if (!nameInput) {
+                alert('⚠️ Silakan masukkan nama Anda terlebih dahulu!');
+                document.getElementById('playerName').focus();
+                return;
+            }
+
+            if (questions.easy.length === 0 || questions.medium.length === 0 || questions.hard.length === 0) {
+                alert('⚠️ Soal belum dimuat! Silakan tunggu atau upload file soal.');
+                return;
+            }
+
+            playerName = nameInput;
+            document.getElementById('playerNameDisplay').textContent = playerName;
+            
+            document.getElementById('startSection').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'grid';
+            
+            if (musicEnabled) {
+                bgMusic.play().catch(e => console.log('Audio play prevented'));
+            }
+            
+            initGame();
+        }
+
+        function initGame() {
+            currentLevel = 0;
+            lifelines = { fifty: true, phone: true, audience: true };
+            usedQuestions = { easy: [], medium: [], hard: [] };
+            
+            renderPrizeLadder();
+            loadQuestion();
+        }
+
+        // Audio Functions
+        function toggleMusic() {
+            musicEnabled = !musicEnabled;
+            const btn = document.getElementById('musicToggle');
+            btn.classList.toggle('muted', !musicEnabled);
+            
+            if (musicEnabled) {
+                bgMusic.play().catch(e => console.log('Audio play failed:', e));
+            } else {
+                bgMusic.pause();
+            }
+        }
+
+        function toggleSFX() {
+            sfxEnabled = !sfxEnabled;
+            const btn = document.getElementById('sfxToggle');
+            btn.classList.toggle('muted', !sfxEnabled);
+        }
+
+        function playCorrectSound() {
+            if (sfxEnabled) {
+                correctSound.currentTime = 0;
+                correctSound.play().catch(e => console.log('Sound play failed:', e));
+            }
+        }
+
+        function playWrongSound() {
+            if (sfxEnabled) {
+                wrongSound.currentTime = 0;
+                wrongSound.play().catch(e => console.log('Sound play failed:', e));
+            }
+        }
+
+        function playTimeSound() {
+            if (sfxEnabled && !timeSoundPlayed) {
+                timeSound.currentTime = 0;
+                timeSound.play().catch(e => console.log('Sound play failed:', e));
+                timeSoundPlayed = true;
+            }
+        }
+
+        function stopTimeSound() {
+            timeSound.pause();
+            timeSound.currentTime = 0;
+            timeSoundPlayed = false;
+        }
+
+        function renderPrizeLadder() {
+            const prizeList = document.getElementById('prizeList');
+            prizeList.innerHTML = '';
+
+            for (let i = prizes.length - 1; i >= 0; i--) {
+                const prize = prizes[i];
+                const div = document.createElement('div');
+                div.className = 'prize-item';
+                
+                if (prize.milestone) div.classList.add('milestone');
+                if (i === currentLevel) div.classList.add('current');
+                else if (i < currentLevel) div.classList.add('passed');
+
+                div.innerHTML = `
+                    <span class="prize-number">${prize.level}</span>
+                    <span class="prize-amount">Rp ${formatMoney(prize.amount)}</span>
+                `;
+                prizeList.appendChild(div);
+            }
+        }
+
+        function formatMoney(amount) {
+            return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function loadQuestion() {
+            if (currentLevel >= prizes.length) {
+                endGame(true);
+                return;
+            }
+
+            const currentPrize = prizes[currentLevel];
+            const difficulty = currentPrize.difficulty;
+            
+            const availableQuestions = questions[difficulty].filter((q, idx) => 
+                !usedQuestions[difficulty].includes(idx)
+            );
+
+            if (availableQuestions.length === 0) {
+                alert('Soal habis untuk tingkat kesulitan ini!');
+                endGame(false);
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+            const questionObj = availableQuestions[randomIndex];
+            
+            const originalIndex = questions[difficulty].indexOf(questionObj);
+            usedQuestions[difficulty].push(originalIndex);
+
+            currentQuestion = {
+                ...questionObj,
+                difficulty: difficulty
+            };
+
+            displayQuestion();
+            updateCurrentPrize();
+            renderPrizeLadder();
+            startTimer();
+        }
+
+        function displayQuestion() {
+            document.getElementById('questionText').textContent = currentQuestion.question;
+            document.getElementById('audiencePoll').innerHTML = '';
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const labels = ['A', 'B', 'C', 'D'];
+            currentQuestion.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.dataset.index = index;
+                div.dataset.value = option;
+                div.onclick = () => selectOption(index);
+
+                div.innerHTML = `
+                    <span class="option-label">${labels[index]}</span>
+                    <span class="option-text">${option}</span>
+                `;
+                optionsContainer.appendChild(div);
+            });
+
+            document.getElementById('lifeline5050').classList.toggle('used', !lifelines.fifty);
+            document.getElementById('lifelinePhone').classList.toggle('used', !lifelines.phone);
+            document.getElementById('lifelineAudience').classList.toggle('used', !lifelines.audience);
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            stopTimeSound();
+            timeLeft = 60;
+            updateTimerDisplay();
+
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft === 10) {
+                    playTimeSound();
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    stopTimeSound();
+                    wrongAnswer();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = `⏱️ ${timeLeft}s`;
+            timerEl.classList.toggle('warning', timeLeft <= 10);
+        }
+
+        function updateCurrentPrize() {
+            const currentPrize = prizes[currentLevel];
+            document.getElementById('currentPrize').textContent = 
+                `Rp ${formatMoney(currentPrize.amount)}`;
+        }
+
+        function selectOption(index) {
+            clearInterval(timer);
+            stopTimeSound();
+            
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => opt.onclick = null);
+
+            const selectedOption = options[index];
+            selectedOption.classList.add('selected');
+
+            setTimeout(() => {
+                const selectedValue = selectedOption.dataset.value;
+                if (selectedValue === currentQuestion.answer) {
+                    correctAnswer(selectedOption);
+                } else {
+                    wrongAnswer(selectedOption, selectedValue);
+                }
+            }, 1500);
+        }
+
+        function correctAnswer(selectedOption) {
+            playCorrectSound();
+            selectedOption.classList.remove('selected');
+            selectedOption.classList.add('correct');
+
+            setTimeout(() => {
+                currentLevel++;
+                if (currentLevel >= prizes.length) {
+                    endGame(true);
+                } else {
+                    loadQuestion();
+                }
+            }, 2000);
+        }
+
+        function wrongAnswer(selectedOption = null, selectedValue = null) {
+            playWrongSound();
+            
+            if (selectedOption) {
+                selectedOption.classList.remove('selected');
+                selectedOption.classList.add('wrong');
+            }
+
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => {
+                if (opt.dataset.value === currentQuestion.answer) {
+                    opt.classList.add('correct');
+                }
+            });
+
+            setTimeout(() => {
+                endGame(false);
+            }, 3000);
+        }
+
+        function use5050() {
+            if (!lifelines.fifty) return;
+            lifelines.fifty = false;
+            document.getElementById('lifeline5050').classList.add('used');
+
+            const options = document.querySelectorAll('.option');
+            const correctAnswer = currentQuestion.answer;
+            let removed = 0;
+
+            const optionsArray = Array.from(options);
+            optionsArray.sort(() => Math.random() - 0.5);
+
+            optionsArray.forEach(opt => {
+                if (opt.dataset.value !== correctAnswer && removed < 2) {
+                    opt.classList.add('disabled');
+                    opt.onclick = null;
+                    removed++;
+                }
+            });
+        }
+
+        function phoneAFriend() {
+            if (!lifelines.phone) return;
+            lifelines.phone = false;
+            document.getElementById('lifelinePhone').classList.add('used');
+
+            const correctAnswer = currentQuestion.answer;
+            const options = currentQuestion.options;
+            
+            const friendAnswer = Math.random() < 0.8 ? 
+                correctAnswer : 
+                options[Math.floor(Math.random() * options.length)];
+
+            alert(`📞 Teman: "Saya ${Math.random() < 0.8 ? 'yakin' : 'rasa'} jawabannya ${friendAnswer}"`);
+        }
+
+        function askAudience() {
+            if (!lifelines.audience) return;
+            lifelines.audience = false;
+            document.getElementById('lifelineAudience').classList.add('used');
+
+            const correctAnswer = currentQuestion.answer;
+            const options = currentQuestion.options;
+            const labels = ['A', 'B', 'C', 'D'];
+
+            let polls = options.map((opt, idx) => ({
+                label: labels[idx],
+                option: opt,
+                percentage: Math.random() * 30
+            }));
+
+            const correctIndex = options.indexOf(correctAnswer);
+            polls[correctIndex].percentage = 40 + Math.random() * 40;
+
+            const total = polls.reduce((sum, p) => sum + p.percentage, 0);
+            polls.forEach(p => p.percentage = Math.round((p.percentage / total) * 100));
+
+            const pollHTML = `
+                <div class="audience-poll">
+                    <h3>📊 Hasil Polling:</h3>
+                    ${polls.map(p => `
+                        <div class="poll-bar">
+                            <span class="poll-label">${p.label}:</span>
+                            <div class="poll-progress">
+                                <div class="poll-fill" style="width: ${p.percentage}%">
+                                    ${p.percentage}%
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('audiencePoll').innerHTML = pollHTML;
+        }
+
+        function quitGame() {
+            if (currentLevel === 0) {
+                alert('Anda belum menjawab pertanyaan apapun!');
+                return;
+            }
+
+            const confirmQuit = confirm('Anda yakin ingin berhenti dan mengambil uang?');
+            if (confirmQuit) {
+                clearInterval(timer);
+                stopTimeSound();
+                endGame(false, true);
+            }
+        }
+
+        function endGame(won, quit = false) {
+            clearInterval(timer);
+            stopTimeSound();
+            
+            const modal = document.getElementById('gameOverModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const finalPrize = document.getElementById('finalPrize');
+
+            let prizeWon = 0;
+            let title = '';
+            let message = '';
+
+            if (won) {
+                playCorrectSound();
+                prizeWon = prizes[prizes.length - 1].amount;
+                title = '🎉 ANDA MENANG! 🎉';
+                message = 'Selamat! Anda menjawab semua pertanyaan!';
+            } else if (quit) {
+                prizeWon = currentLevel > 0 ? prizes[currentLevel - 1].amount : 0;
+                title = '💰 Ambil Uang';
+                message = 'Terima kasih sudah bermain!';
+            } else {
+                for (let i = currentLevel - 1; i >= 0; i--) {
+                    if (prizes[i].milestone) {
+                        prizeWon = prizes[i].amount;
+                        break;
+                    }
+                }
+                title = '😢 Sayang Sekali!';
+                message = 'Jawaban salah. Anda membawa:';
+            }
+
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            finalPrize.textContent = `Rp ${formatMoney(prizeWon)}`;
+
+            // Save to leaderboard
+            saveScore(playerName, prizeWon, currentLevel);
+
+            modal.style.display = 'flex';
+        }
+
+        // Leaderboard Functions
+        function saveScore(name, prize, level) {
+            let leaderboard = JSON.parse(localStorage.getItem('millionaireScores') || '[]');
+            
+            leaderboard.push({
+                name: name,
+                prize: prize,
+                level: level,
+                date: new Date().toLocaleString('id-ID')
+            });
+
+            leaderboard.sort((a, b) => b.prize - a.prize);
+            leaderboard = leaderboard.slice(0, 10); // Keep top 10
+
+            localStorage.setItem('millionaireScores', JSON.stringify(leaderboard));
+        }
+
+        function showLeaderboard() {
+            document.getElementById('gameOverModal').style.display = 'none';
+            
+            const leaderboard = JSON.parse(localStorage.getItem('millionaireScores') || '[]');
+            const content = document.getElementById('leaderboardContent');
+
+            if (leaderboard.length === 0) {
+                content.innerHTML = '<div class="no-scores">Belum ada skor yang tercatat</div>';
+            } else {
+                const medals = ['🥇', '🥈', '🥉'];
+                content.innerHTML = `
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Nama</th>
+                                <th>Hadiah</th>
+                                <th>Level</th>
+                                <th>Tanggal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${leaderboard.map((score, index) => `
+                                <tr>
+                                    <td>
+                                        <span class="rank-medal">${medals[index] || (index + 1)}</span>
+                                    </td>
+                                    <td>${score.name}</td>
+                                    <td>Rp ${formatMoney(score.prize)}</td>
+                                    <td>${score.level}/15</td>
+                                    <td style="font-size: 0.75rem;">${score.date}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            document.getElementById('leaderboardModal').style.display = 'flex';
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboardModal').style.display = 'none';
+        }
+
+        function clearLeaderboard() {
+            if (confirm('Anda yakin ingin menghapus semua skor?')) {
+                localStorage.removeItem('millionaireScores');
+                showLeaderboard();
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverModal').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('startSection').style.display = 'block';
+            document.getElementById('playerName').value = '';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('fileInput').value = '';
+            
+            // Reload default file
+            loadDefaultFile();
+        }
+    </script>
+</body>
+</html>
